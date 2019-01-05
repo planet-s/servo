@@ -192,7 +192,64 @@ fn strip_url(mut referrer_url: ServoUrl, origin_only: bool) -> Option<ServoUrl> 
         }
         return Some(referrer_url);
     }
-    return None;
+    None
+}
+
+/// <https://url.spec.whatwg.org/#string-percent-decode>
+fn string_percent_decode(input: &str) -> Option<String> {
+    // Step 1
+    let bytes = input.bytes();
+
+    // Step 2
+    String::from_utf8(percent_decode(bytes)).ok()
+}
+
+/// <https://url.spec.whatwg.org/#percent-decode>
+fn percent_decode(input: impl Iterator<Item = u8>) -> Vec<u8> {
+    let mut input = input.peekable();
+    // Step 1
+    let mut output = vec![];
+
+    // Step 2
+    let mut current_byte = input.next();
+    while let Some(byte) = current_byte {
+        // Step 2.1
+        if byte != b'%' {
+            output.push(byte);
+            current_byte = input.next();
+        } else {
+            current_byte = input.next();
+            if current_byte.map_or(false, |b| is_base16_representation(&b)) {
+                // Step 2.3
+                if input.peek().map_or(false, is_base16_representation) {
+                    // Step 2.3.1
+                    let byte_slice = [current_byte.unwrap(), input.next().unwrap()];
+                    let str_slice = std::str::from_utf8(&byte_slice[..]).unwrap();
+                    let byte_point = u8::from_str_radix(str_slice, 16).unwrap();
+
+                    // Step 2.3.2
+                    output.push(byte_point);
+
+                    // Step 2.3.3
+                    current_byte = input.next();
+                    continue;
+                }
+            }
+
+            // Step 2.2
+            output.push(byte);
+        }
+    }
+
+    // Step 3
+    output
+}
+
+fn is_base16_representation(input: &u8) -> bool {
+    match *input {
+        0x30..=0x39 | 0x41..=0x46 | 0x61..=0x66 => true,
+        _ => false,
+    }
 }
 
 /// <https://w3c.github.io/webappsec-referrer-policy/#determine-requests-referrer>
@@ -412,17 +469,13 @@ fn obtain_response(
     // TODO(#21261) connect_start: set if a persistent connection is *not* used and the last non-redirected
     // fetch passes the timing allow check
     let connect_start = precise_time_ms();
-    // https://url.spec.whatwg.org/#percent-encoded-bytes
+    let hyper_uri = url.as_url();
     let request = HyperRequest::builder()
         .method(method)
-        .uri(
-            url.clone()
-                .into_url()
-                .as_ref()
-                .replace("|", "%7C")
-                .replace("{", "%7B")
-                .replace("}", "%7D"),
-        )
+        .uri(match string_percent_decode(hyper_uri.as_ref()) {
+            Some(uri) => uri,
+            None => hyper_uri.to_string(),
+        })
         .body(WrappedBody::new(request_body.clone().into()));
 
     let mut request = match request {
