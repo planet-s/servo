@@ -1,0 +1,20 @@
+[submodule "redox/libloading"]
+	path = redox/libloading
+	url = https://gitlab.redox-os.org/redox-os/rust_libloading.git
+	branch = redox
+[submodule "redox/mozangle"]
+	path = redox/mozangle
+	url = https://gitlab.redox-os.org/redox-os/mozangle.git
+	branch = redox
+[submodule "redox/shared_library"]
+	path = redox/shared_library
+	url = https://gitlab.redox-os.org/redox-os/shared_library.git
+	branch = redox
+[submodule "redox/mio"]
+	path = redox/mio
+	url = https://gitlab.redox-os.org/redox-os/mio.git
+	branch = master
+[submodule "redox/gaol"]
+	path = redox/gaol
+	url = https://gitlab.redox-os.org/redox-os/gaol.git
+	branch = redox

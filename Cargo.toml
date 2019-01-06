@@ -24,3 +24,10 @@ opt-level = 3
 #
 #     [patch."https://github.com/servo/<repository>"]
 #     <crate> = { path = "/path/to/local/checkout" }
+libloading = { path = "redox/libloading" }
+mio = { path = "redox/mio" }
+mozangle = { path = "redox/mozangle" }
+shared_library = { path = "redox/shared_library" }
+
+[patch."https://github.com/servo/gaol"]
+gaol = { path = "redox/gaol" }

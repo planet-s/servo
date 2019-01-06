@@ -554,11 +554,11 @@ class MachCommands(CommandBase):
                 return status
 
         if very_verbose:
-            print (["Calling", "cargo", "build"] + opts)
+            print (["Calling", "xargo", "build"] + opts)
             for key in env:
                 print((key, env[key]))
 
-        status = self.call_rustup_run(["cargo", "build"] + opts, env=env, verbose=verbose)
+        status = self.call_rustup_run(["xargo", "build"] + opts, env=env, verbose=verbose)
         elapsed = time() - build_start
 
         # Do some additional things if the build succeeded
@@ -633,5 +633,5 @@ class MachCommands(CommandBase):
         if verbose:
             opts += ["-v"]
         opts += params
-        return check_call(["cargo", "clean"] + opts,
+        return check_call(["xargo", "clean"] + opts,
                           env=self.build_env(), cwd=self.ports_servo_crate(), verbose=verbose)

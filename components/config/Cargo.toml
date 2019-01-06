@@ -30,4 +30,4 @@ env_logger = "0.6"
 std_test_override = { path = "../std_test_override" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-dirs = "1.0"
+dirs = "1.0.4"
